@@ -1,0 +1,35 @@
+[package]
+authors = ["Trent Shailer"]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+name = "cli-helper"
+rust-version = "1.85"
+version = "0.1.0"
+
+[dependencies]
+simply_colored = "0.1"
+
+# Generating source code
+convert_case = "0.8"
+pathdiff = "0.2"
+prettyplease = "0.2"
+proc-macro2 = { version = "1.0", default-features = false }
+quote = "1.0"
+regex = { version = "1.11", default-features = false, features = ["std"] }
+syn = "2.0"
+
+# Error handling
+thiserror = "2.0"
+
+[lints.rust]
+"deprecated_in_future" = "warn"
+"missing_docs" = "warn"
+"rust_2018_idioms" = "warn"
+"unused_qualifications" = "warn"
+
+[lints.clippy]
+"as_conversions" = "warn"
+"inconsistent_struct_constructor" = "warn"
+"todo" = "warn"
+"unnecessary_self_imports" = "warn"
+"use_self" = "warn"
