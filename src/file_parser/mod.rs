@@ -1,4 +1,5 @@
 mod module;
+#[cfg(feature = "generate")]
 mod write;
 
 use std::{
@@ -12,6 +13,7 @@ use thiserror::Error;
 use crate::FileType;
 
 pub use module::{Module, ModuleError, to_valid_ident};
+#[cfg(feature = "generate")]
 pub use write::WriteError;
 
 /// Parses files into modules containing an inner parsed type.

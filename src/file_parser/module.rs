@@ -5,10 +5,13 @@ use std::{
 };
 
 use convert_case::{Case, Casing};
-use proc_macro2::TokenStream;
-use quote::{ToTokens, format_ident, quote};
 use regex::Regex;
 use thiserror::Error;
+
+#[cfg(feature = "generate")]
+use proc_macro2::TokenStream;
+#[cfg(feature = "generate")]
+use quote::{ToTokens, format_ident, quote};
 
 /// Convert a string to a valid `ident`.
 pub fn to_valid_ident(name: &str) -> String {
@@ -31,6 +34,7 @@ pub struct Module<T: TryFrom<String>> {
     pub name: String,
 }
 
+#[cfg(feature = "generate")]
 impl<T: ToTokens + TryFrom<String>> ToTokens for Module<T> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let name = format_ident!("{}", self.name);

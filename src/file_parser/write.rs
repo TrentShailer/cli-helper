@@ -15,16 +15,18 @@ impl<T: TryFrom<String> + ToTokens> FileParser<T> {
     pub fn write(&self, target: Option<&Path>) -> Result<(), WriteError> {
         match target {
             Some(target) => {
-                let metadata = target
-                    .metadata()
-                    .map_err(|e| WriteError::Io(e, target.to_path_buf()))?;
+                if target.exists() {
+                    let metadata = target
+                        .metadata()
+                        .map_err(|e| WriteError::Io(e, target.to_path_buf()))?;
 
-                let file_type = FileType::from(&metadata);
-                if file_type != FileType::File {
-                    return Err(WriteError::UnsupportedTarget(
-                        target.to_path_buf(),
-                        file_type,
-                    ));
+                    let file_type = FileType::from(&metadata);
+                    if file_type != FileType::File {
+                        return Err(WriteError::UnsupportedTarget(
+                            target.to_path_buf(),
+                            file_type,
+                        ));
+                    }
                 }
 
                 let output_file = File::options()
