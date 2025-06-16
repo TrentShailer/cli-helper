@@ -1,3 +1,5 @@
+use std::io::{Write, stdout};
+
 use simply_colored::{BOLD, CYAN, GREEN, RED, RESET};
 
 const LINE_START: &str = "\x1b[1G";
@@ -49,6 +51,7 @@ impl<T> ActionResult for Option<T> {
 }
 
 /// Action State
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum State {
     /// The action is in progress.
     InProgress,
@@ -68,6 +71,10 @@ pub struct Action {
     pub actioned_verb: String,
     /// Details for the action.
     pub detail: String,
+    /// The number of characters to indent the action by.
+    pub indent: usize,
+    /// Should the action overwrite the previous line when printing.
+    pub should_overwrite: bool,
 }
 
 impl Action {
@@ -76,12 +83,15 @@ impl Action {
         actioning_verb: S1,
         actioned_verb: S2,
         detail: S3,
+        indent: usize,
     ) -> Self {
-        let progress = Self {
+        let mut progress = Self {
             state: State::InProgress,
             actioning_verb: actioning_verb.to_string(),
             actioned_verb: actioned_verb.to_string(),
             detail: detail.to_string(),
+            indent,
+            should_overwrite: false,
         };
         progress.print();
         progress
@@ -93,28 +103,40 @@ impl Action {
         self.print();
     }
 
-    fn print(&self) {
+    /// Print the message for this action.
+    pub fn print(&mut self) {
+        let mut stdout = stdout().lock();
+
+        let message = self.message_string(self.state);
+
+        if self.should_overwrite {
+            stdout
+                .write_all(format!("{LINE_UP}{LINE_START}{ERASE_LINE}").as_bytes())
+                .unwrap();
+        }
+
+        stdout.write_all(format!("{message}\n").as_bytes()).unwrap();
+
+        stdout.flush().unwrap();
+
+        self.should_overwrite = true;
+    }
+
+    /// Set the action to not overwrite the previous line.
+    pub fn dont_overwrite(&mut self) {
+        self.should_overwrite = false;
+    }
+
+    fn message_string(&self, state: State) -> String {
+        let indent = " ".repeat(self.indent);
         let actioning = &self.actioning_verb;
         let actioned = &self.actioned_verb;
         let detail = &self.detail;
 
-        let width = actioning.len().max(actioned.len()) + "Failed ".len();
-        let failed_width = width - "Failed ".len();
-
-        match self.state {
-            State::InProgress => {
-                println!("{LINE_START}{ERASE_LINE}{CYAN}{BOLD}{actioning:>width$}{RESET} {detail}")
-            }
-            State::Success => {
-                println!(
-                    "{LINE_UP}{LINE_START}{ERASE_LINE}{GREEN}{BOLD}{actioned:>width$}{RESET} {detail}"
-                )
-            }
-            State::Error => {
-                println!(
-                    "{LINE_UP}{LINE_START}{ERASE_LINE}{RED}{BOLD}Failed {actioning:>failed_width$}{RESET} {detail}"
-                )
-            }
+        match state {
+            State::InProgress => format!("{indent}{CYAN}{BOLD}{actioning}{RESET} {detail}"),
+            State::Success => format!("{indent}{GREEN}{BOLD}{actioned}{RESET} {detail}"),
+            State::Error => format!("{indent}{RED}{BOLD}Failed {actioning}{RESET} {detail}"),
         }
     }
 }
