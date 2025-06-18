@@ -136,7 +136,9 @@ impl Action {
         match state {
             State::InProgress => format!("{indent}{CYAN}{BOLD}{actioning}{RESET} {detail}"),
             State::Success => format!("{indent}{GREEN}{BOLD}{actioned}{RESET} {detail}"),
-            State::Error => format!("{indent}{RED}{BOLD}Failed {actioning}{RESET} {detail}"),
+            State::Error => {
+                format!("{indent}{RED}{BOLD}{actioning}{RESET} {detail} {RED}{BOLD}failed{RESET}")
+            }
         }
     }
 }
