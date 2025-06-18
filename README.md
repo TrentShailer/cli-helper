@@ -6,5 +6,5 @@ Various helper functions, structures, and traits for creating my CLIs.
 >
 > ### This is a personal project
 >
-> Maintenance, bug fixes, new features, and support will only be provided
-> when/if I feel like it. Updates may violate semantic versioning.
+> Maintenance, bug fixes, new features, and support will only be provided when/if I feel like it.
+> Updates may violate semantic versioning.
