@@ -86,7 +86,7 @@ pub struct WriteError {
 }
 impl fmt::Display for WriteError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "failed to write output")
+        write!(f, "error while writing the output")
     }
 }
 impl Error for WriteError {
@@ -138,21 +138,21 @@ impl fmt::Display for WriteErrorKind {
         match &self {
             Self::UnsupportedFileType { file_type, path } => write!(
                 f,
-                "{} exists with unsupported file type {:?}",
+                "`{}` exists with unsupported file type `{:?}`",
                 path.to_string_lossy(),
                 file_type
             ),
             Self::OpenTarget { path, .. } => write!(
                 f,
-                "failed to open/create target file {} for writing",
+                "failed to open/create the target file `{}`",
                 path.to_string_lossy()
             ),
             Self::ReadMetadata { path, .. } => write!(
                 f,
-                "failed to read the metadata of the target file {}",
+                "failed to read the metadata of the target file `{}`",
                 path.to_string_lossy()
             ),
-            Self::RustFmt { .. } => write!(f, "failed to run rustfmt on the output"),
+            Self::RustFmt { .. } => write!(f, "running `rustfmt` on the output failed"),
         }
     }
 }

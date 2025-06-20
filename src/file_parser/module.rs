@@ -1,6 +1,6 @@
-use core::{cell::LazyCell, error::Error, fmt, marker::PhantomData};
+use core::{cell::LazyCell, marker::PhantomData};
 use std::{
-    fs, io,
+    fs,
     path::{Path, PathBuf},
 };
 
@@ -12,7 +12,7 @@ use proc_macro2::TokenStream;
 #[cfg(feature = "generate")]
 use quote::{ToTokens, format_ident, quote};
 
-use crate::file_parser::ParseFrom;
+use crate::{ParseFileError, ParseFileErrorKind, file_parser::ParseFrom};
 
 /// Convert a string to a valid `ident`.
 pub fn to_valid_ident(name: &str) -> String {
@@ -54,12 +54,14 @@ impl<State, T: ToTokens + ParseFrom<String, State>> ToTokens for Module<State, T
 }
 
 impl<State, T: ParseFrom<String, State>> ParseFrom<&Path, State> for Module<State, T> {
-    type Error = ParseModuleError<T::Error>;
+    type Error = ParseFileError<T::Error>;
 
     fn parse(source: &Path, state: &mut State) -> Result<Self, Self::Error> {
-        let contents = fs::read_to_string(source).map_err(|e| ParseModuleError {
-            path: source.to_path_buf(),
-            kind: ParseModuleErrorKind::ReadFile { source: e },
+        let contents = fs::read_to_string(source).map_err(|e| ParseFileError {
+            kind: ParseFileErrorKind::ReadFile {
+                source: e,
+                path: source.to_path_buf(),
+            },
         })?;
 
         let name = to_valid_ident(
@@ -69,9 +71,11 @@ impl<State, T: ParseFrom<String, State>> ParseFrom<&Path, State> for Module<Stat
                 .to_string_lossy(),
         );
 
-        let contents = T::parse(contents, state).map_err(|e| ParseModuleError {
-            path: source.to_path_buf(),
-            kind: ParseModuleErrorKind::ParseContents { source: e },
+        let contents = T::parse(contents, state).map_err(|e| ParseFileError {
+            kind: ParseFileErrorKind::ParseContents {
+                source: e,
+                path: source.to_path_buf(),
+            },
         })?;
 
         Ok(Self {
@@ -80,60 +84,5 @@ impl<State, T: ParseFrom<String, State>> ParseFrom<&Path, State> for Module<Stat
             name,
             phantom_data: Default::default(),
         })
-    }
-}
-
-#[derive(Debug)]
-#[non_exhaustive]
-/// Failed to parse the module.
-pub struct ParseModuleError<E: Error + 'static> {
-    /// Path to the source file.
-    pub path: PathBuf,
-    /// The error variants.
-    pub kind: ParseModuleErrorKind<E>,
-}
-impl<E: Error> fmt::Display for ParseModuleError<E> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "failed to parse module {}", self.path.to_string_lossy())
-    }
-}
-impl<E: Error> Error for ParseModuleError<E> {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        Some(&self.kind)
-    }
-}
-
-#[derive(Debug)]
-#[non_exhaustive]
-/// Parse module error variants.
-pub enum ParseModuleErrorKind<E: Error + 'static> {
-    #[non_exhaustive]
-    /// Failed to read the source file.
-    ReadFile {
-        /// The source IO error.
-        source: io::Error,
-    },
-
-    #[non_exhaustive]
-    /// Failed to parse the contents of the source file.
-    ParseContents {
-        /// The source parse error.
-        source: E,
-    },
-}
-impl<E: Error> fmt::Display for ParseModuleErrorKind<E> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match &self {
-            Self::ReadFile { .. } => write!(f, "failed to read module file"),
-            Self::ParseContents { .. } => write!(f, "file to parse module contents"),
-        }
-    }
-}
-impl<E: Error> Error for ParseModuleErrorKind<E> {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match &self {
-            Self::ReadFile { source } => Some(source),
-            Self::ParseContents { source } => Some(source),
-        }
     }
 }

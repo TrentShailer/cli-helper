@@ -21,11 +21,13 @@ impl fmt::Debug for Report {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut current_error = Some(self.0.as_ref());
 
-        writeln!(f, "`{}` reported an error", env!("CARGO_PKG_NAME"))?;
+        writeln!(f, "`{}` exited unsuccessfully", env!("CARGO_PKG_NAME"))?;
 
+        let mut index = 1;
         while let Some(error) = current_error {
-            writeln!(f, " {BOLD}{RED}*{RESET} {error}")?;
+            writeln!(f, "  {BOLD}{RED}{index}{RESET}{BOLD}:{RESET} {error}")?;
             current_error = error.source();
+            index += 1;
         }
 
         Ok(())

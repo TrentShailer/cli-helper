@@ -12,8 +12,7 @@ mod write_tokens;
 pub use action::{Action, ActionResult, State};
 pub use error_report::{Report, ReportResult};
 pub use file_parser::{
-    FileParser, Module, ParseFileError, ParseFileErrorKind, ParseFrom, ParseModuleError,
-    ParseModuleErrorKind, to_valid_ident,
+    FileParser, Module, ParseFileError, ParseFileErrorKind, ParseFrom, to_valid_ident,
 };
 pub use file_type::FileType;
 pub use log::{print_error, print_fail, print_success, print_warning};

@@ -11,7 +11,7 @@ use std::{
 
 use crate::FileType;
 
-pub use module::{Module, ParseModuleError, ParseModuleErrorKind, to_valid_ident};
+pub use module::{Module, to_valid_ident};
 #[cfg(feature = "generate")]
 pub use write::{WriteError, WriteErrorKind};
 
@@ -47,9 +47,7 @@ impl<State, T: ParseFrom<String, State>> FileParser<State, T> {
         let mut modules = vec![];
         match file_type {
             FileType::File => {
-                let module = Module::parse(source, state).map_err(|source| ParseFileError {
-                    kind: ParseFileErrorKind::ParseError { source },
-                })?;
+                let module = Module::parse(source, state)?;
 
                 modules.push(module);
             }
@@ -74,12 +72,7 @@ impl<State, T: ParseFrom<String, State>> FileParser<State, T> {
                         continue;
                     }
 
-                    let module =
-                        Module::parse(entry.path().as_path(), state).map_err(|source| {
-                            ParseFileError {
-                                kind: ParseFileErrorKind::ParseError { source },
-                            }
-                        })?;
+                    let module = Module::parse(entry.path().as_path(), state)?;
 
                     modules.push(module)
                 }
@@ -115,7 +108,7 @@ pub struct ParseFileError<E: Error + 'static> {
 }
 impl<E: Error> fmt::Display for ParseFileError<E> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "failed to parse source")
+        write!(f, "error while parsing the source file/directory")
     }
 }
 impl<E: Error> Error for ParseFileError<E> {
@@ -156,10 +149,21 @@ pub enum ParseFileErrorKind<E: Error + 'static> {
     },
 
     #[non_exhaustive]
+    /// Failed to read one of the source files.
+    ReadFile {
+        /// The source IO error.
+        source: io::Error,
+        /// The path to the source.
+        path: PathBuf,
+    },
+
+    #[non_exhaustive]
     /// Failed to parse one of the files.
-    ParseError {
+    ParseContents {
         /// The source module parse error.
-        source: ParseModuleError<E>,
+        source: E,
+        /// The path to the source.
+        path: PathBuf,
     },
 }
 impl<E: Error> fmt::Display for ParseFileErrorKind<E> {
@@ -167,21 +171,32 @@ impl<E: Error> fmt::Display for ParseFileErrorKind<E> {
         match &self {
             Self::ReadSourceMetadata { path, .. } => write!(
                 f,
-                "failed to read source metadata {}",
+                "failed reading the metadata for `{}`",
                 path.to_string_lossy()
             ),
             Self::ReadDirectory { path, .. } => {
-                write!(f, "failed to read directory {}", path.to_string_lossy())
+                write!(
+                    f,
+                    "failed reading the directory `{}`",
+                    path.to_string_lossy()
+                )
             }
             Self::UnsupportedFileType { file_type, path } => {
                 write!(
                     f,
-                    "source file type {:?} is unsupported {}",
+                    "source file type `{:?}` is unsupported `{}`",
                     file_type,
                     path.to_string_lossy()
                 )
             }
-            Self::ParseError { .. } => write!(f, "a file failed parsing"),
+            Self::ReadFile { path, .. } => {
+                write!(f, "failed reading the file `{}`", path.to_string_lossy())
+            }
+            Self::ParseContents { path, .. } => write!(
+                f,
+                "failed to parse the contents of `{}`",
+                path.to_string_lossy()
+            ),
         }
     }
 }
@@ -190,7 +205,8 @@ impl<E: Error> Error for ParseFileErrorKind<E> {
         match &self {
             Self::ReadSourceMetadata { source, .. } => Some(source),
             Self::ReadDirectory { source, .. } => Some(source),
-            Self::ParseError { source, .. } => Some(source),
+            Self::ReadFile { source, .. } => Some(source),
+            Self::ParseContents { source, .. } => Some(source),
             _ => None,
         }
     }
