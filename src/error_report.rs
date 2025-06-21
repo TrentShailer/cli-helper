@@ -16,12 +16,20 @@ where
         Self(Box::new(value))
     }
 }
-
 impl fmt::Debug for Report {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{self}")
+    }
+}
+impl fmt::Display for Report {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut current_error = Some(self.0.as_ref());
 
-        writeln!(f, "`{}` exited unsuccessfully", env!("CARGO_PKG_NAME"))?;
+        writeln!(
+            f,
+            "`{}` exited unsuccessfully",
+            option_env!("CARGO_BIN_NAME").unwrap_or("command")
+        )?;
 
         let mut index = 1;
         while let Some(error) = current_error {

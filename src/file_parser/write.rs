@@ -12,7 +12,12 @@ use crate::{FileParser, FileType, file_parser::ParseFrom, write_tokens_blocking}
 
 impl<State, T: ParseFrom<String, State> + ToTokens> FileParser<State, T> {
     /// Write the parsed files to some target or `stdout` if None.
-    pub fn write(&self, target: Option<&Path>) -> Result<(), WriteError> {
+    pub fn write(
+        &self,
+        target: Option<&Path>,
+        generator_name: &'static str,
+        generator_version: &'static str,
+    ) -> Result<(), WriteError> {
         match target {
             Some(target) => {
                 if target.exists() {
@@ -46,18 +51,26 @@ impl<State, T: ParseFrom<String, State> + ToTokens> FileParser<State, T> {
                         },
                     })?;
 
-                write_tokens_blocking(self.to_token_stream(), output_file).map_err(|source| {
-                    WriteError {
-                        kind: WriteErrorKind::RustFmt { source },
-                    }
+                write_tokens_blocking(
+                    self.to_token_stream(),
+                    output_file,
+                    generator_name,
+                    generator_version,
+                )
+                .map_err(|source| WriteError {
+                    kind: WriteErrorKind::RustFmt { source },
                 })?;
             }
 
             None => {
-                write_tokens_blocking(self.to_token_stream(), stdout()).map_err(|source| {
-                    WriteError {
-                        kind: WriteErrorKind::RustFmt { source },
-                    }
+                write_tokens_blocking(
+                    self.to_token_stream(),
+                    stdout(),
+                    generator_name,
+                    generator_version,
+                )
+                .map_err(|source| WriteError {
+                    kind: WriteErrorKind::RustFmt { source },
                 })?;
             }
         }

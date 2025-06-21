@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "cli-helper"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "convert_case",
  "proc-macro2",
@@ -93,9 +93,9 @@ checksum = "9d26fcce2f397e5488affdf681b20c030aa9faa877b92b1825e5d66b08d2fc33"
 
 [[package]]
 name = "syn"
-version = "2.0.103"
+version = "2.0.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4307e30089d6fd6aff212f2da3a1f9e32f3223b1f010fb09b7c95f90f3ca1e8"
+checksum = "17b6f705963418cdb9927482fa304bc562ece2fdd4f616084c50b7023b435a40"
 dependencies = [
  "proc-macro2",
  "quote",
