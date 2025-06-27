@@ -2,7 +2,6 @@
 //!
 
 mod action;
-mod error_report;
 mod file_parser;
 mod file_type;
 mod log;
@@ -10,7 +9,6 @@ mod log;
 mod write_tokens;
 
 pub use action::{Action, ActionResult, State};
-pub use error_report::{Report, ReportResult};
 pub use file_parser::{
     FileParser, Module, ParseFileError, ParseFileErrorKind, ParseFrom, to_valid_ident,
 };
