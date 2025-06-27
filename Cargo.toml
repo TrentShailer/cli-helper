@@ -1,8 +1,9 @@
 [package]
 authors = ["Trent Shailer"]
+description = "Various helper functions, structures, and traits for creating my CLIs."
 edition = "2024"
 license = "MIT OR Apache-2.0"
-name = "cli-helper"
+name = "ts-cli-helper"
 rust-version = "1.88"
 version = "0.5.0"
 

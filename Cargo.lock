@@ -12,18 +12,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cli-helper"
-version = "0.5.0"
-dependencies = [
- "convert_case",
- "proc-macro2",
- "quote",
- "regex",
- "simply_colored",
- "syn",
-]
-
-[[package]]
 name = "convert_case"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -100,6 +88,18 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "ts-cli-helper"
+version = "0.5.0"
+dependencies = [
+ "convert_case",
+ "proc-macro2",
+ "quote",
+ "regex",
+ "simply_colored",
+ "syn",
 ]
 
 [[package]]
