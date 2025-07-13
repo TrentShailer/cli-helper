@@ -5,11 +5,9 @@ edition = "2024"
 license = "MIT OR Apache-2.0"
 name = "ts-cli-helper"
 rust-version = "1.88"
-version = "0.5.0"
+version = "0.6.0"
 
 [dependencies]
-simply_colored = "0.1"
-
 # Generating source code
 proc-macro2 = { version = "1.0", default-features = false, optional = true }
 quote = { version = "1.0", optional = true }
@@ -18,6 +16,8 @@ syn = { version = "2.0", optional = true }
 # Create valid `ident`
 convert_case = { version = "0.8" }
 regex = { version = "1.11", default-features = false, features = ["std"] }
+
+ts-rust-helper = { version = "0.7", features = ["styled"] }
 
 [features]
 generate = ["dep:proc-macro2", "dep:quote", "dep:syn"]

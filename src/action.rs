@@ -1,10 +1,6 @@
 use std::io::{Write, stdout};
 
-use simply_colored::{BOLD, CYAN, GREEN, RED, RESET};
-
-const LINE_START: &str = "\x1b[1G";
-const ERASE_LINE: &str = "\x1b[0K";
-const LINE_UP: &str = "\x1b[1F";
+use ts_rust_helper::style::*;
 
 /// Extension trait to update an action state.
 pub trait ActionResult {
@@ -110,9 +106,7 @@ impl Action {
         let message = self.message_string(self.state);
 
         if self.should_overwrite {
-            stdout
-                .write_all(format!("{LINE_UP}{LINE_START}{ERASE_LINE}").as_bytes())
-                .unwrap();
+            stdout.write_all(ERASE_LINE_UP.as_bytes()).unwrap();
         }
 
         stdout.write_all(format!("{message}\n").as_bytes()).unwrap();
